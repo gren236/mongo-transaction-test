@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readconcern"
@@ -26,7 +27,7 @@ type barEntry struct {
 
 func FindOneLock(coll *mongo.Collection, ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult {
 	// TODO map options.FindOneOptions to options.FindOneAndUpdateOptions
-	return coll.FindOneAndUpdate(ctx, filter, bson.D{{"$set", bson.D{{"lockRandom", bson.TypeObjectID}}}})
+	return coll.FindOneAndUpdate(ctx, filter, bson.D{{"$set", bson.D{{"lockRandom", primitive.NewObjectID()}}}})
 }
 
 func main() {
@@ -110,10 +111,9 @@ func main() {
 			sessCtx.StartTransaction(txnOpts)
 
 			if t := <-aChan; t {
-				_, dErr := fooColl.UpdateOne(
+				_, dErr := fooColl.DeleteOne(
 					sessCtx,
 					bson.D{{"_id", "6475eb087660882fa85dff59"}},
-					bson.D{{"$set", bson.D{{"hello", "bar"}}}},
 				)
 				if dErr != nil {
 					sessCtx.AbortTransaction(sessCtx)
@@ -122,7 +122,6 @@ func main() {
 				}
 
 				log.Println("updated 6475eb087660882fa85dff59")
-				return nil
 			}
 
 			sessCtx.CommitTransaction(sessCtx)
