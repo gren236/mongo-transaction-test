@@ -25,9 +25,17 @@ type barEntry struct {
 	Answer int `json:"answer"`
 }
 
-func FindOneLock(coll *mongo.Collection, ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult {
+func FindOneLock(
+	coll *mongo.Collection,
+	ctx context.Context,
+	filter interface{},
+	opts ...*options.FindOneOptions,
+) *mongo.SingleResult {
 	// TODO map options.FindOneOptions to options.FindOneAndUpdateOptions
-	return coll.FindOneAndUpdate(ctx, filter, bson.D{{"$set", bson.D{{"lockRandom", primitive.NewObjectID()}}}})
+	return coll.FindOneAndUpdate(ctx, filter, bson.D{{
+		"$set",
+		bson.D{{"lockRandom", primitive.NewObjectID()}},
+	}})
 }
 
 func main() {
