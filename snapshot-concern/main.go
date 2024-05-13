@@ -60,23 +60,16 @@ func main() {
 		defer session.EndSession(ctx)
 
 		res, err := session.WithTransaction(ctx, func(sessCtx mongo.SessionContext) (interface{}, error) {
-			//var barRes barEntry
-			//
-			//barRec := barColl.FindOne(sessCtx, bson.D{{"_id", "6475ebec7c8c0d02309b0a46"}})
-			//barRec.Decode(&barRes)
-			//
-			//fmt.Println(barRes.Answer)
+			var fooRes fooEntry
+
+			fooRec := fooColl.FindOne(sessCtx, bson.D{{"_id", "6475eb087660882fa85dff59"}})
+			fooRec.Decode(&fooRes)
+
+			fmt.Println(fooRes.Hello)
 
 			aChan <- true
 
 			if t := <-bChan; t {
-				var fooRes fooEntry
-
-				fooRec := fooColl.FindOne(sessCtx, bson.D{{"_id", "6475eb087660882fa85dff59"}})
-				fooRec.Decode(&fooRes)
-
-				fmt.Println(fooRes.Hello)
-
 				if fooRes.Hello != "world" {
 					return nil, fmt.Errorf("failed to compare foo record")
 				}
